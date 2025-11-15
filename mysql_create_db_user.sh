@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # mysql_create_db_user.sh
-# Reads MySQL credentials from .env (for dev/prod).
+# Reads MySQL credentials from .env (for local/dev/prod).
 # Does NOT print credentials to stdout.
 # Saves them to ./db_credential/<database>_<env>.cred with secure permissions.
 
@@ -17,14 +17,14 @@ echo "=== MySQL DB & User Creator ==="
 
 # 1) Select environment
 while true; do
-  read -rp "Select environment (dev or prod) [dev]: " ENV
+  read -rp "Select environment (local, dev, or prod) [dev]: " ENV
   ENV=${ENV:-dev}
   case "${ENV,,}" in
-    dev|production|prod)
+    local|dev|production|prod)
       break
       ;;
     *)
-      echo "Please enter dev or prod."
+      echo "Please enter local, dev, or prod."
       ;;
   esac
 done
@@ -33,7 +33,11 @@ done
 [[ "${ENV,,}" == "production" ]] && ENV="prod"
 
 # 2) Resolve host, user, pass from .env or prompt
-if [[ "${ENV,,}" == "dev" ]]; then
+if [[ "${ENV,,}" == "local" ]]; then
+  MYSQL_HOST=${LOCAL_MYSQL_HOST:-127.0.0.1}
+  ADMIN_USER=${LOCAL_ADMIN_USER:-root}
+  ADMIN_PASS=${LOCAL_ADMIN_PASS:-}
+elif [[ "${ENV,,}" == "dev" ]]; then
   MYSQL_HOST=${DEV_MYSQL_HOST:-127.0.0.1}
   ADMIN_USER=${DEV_ADMIN_USER:-root}
   ADMIN_PASS=${DEV_ADMIN_PASS:-}
